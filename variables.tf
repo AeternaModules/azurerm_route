@@ -19,22 +19,6 @@ EOT
     route_table_name       = string
     next_hop_in_ip_address = optional(string)
   }))
-  validation {
-    condition = alltrue([
-      for k, v in var.routes : (
-        length(v.address_prefix) > 0
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.routes : (
-        v.next_hop_in_ip_address == null || (length(v.next_hop_in_ip_address) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
   # --- Unconfirmed validation candidates, derived from azurerm_route's provider source ---
   # Not auto-enabled: either a bespoke provider validator we can't safely translate,
   # or a path that crosses a list-typed block (needs its own for_each wrapping).
@@ -57,7 +41,13 @@ EOT
   #   source:    [from resourcegroups.ValidateName] !matched
   # path: route_table_name
   #   source:    [from validate.RouteTableName] !regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,78}[a-zA-Z0-9_]?$`).MatchString(value)
+  # path: address_prefix
+  #   condition: length(value) > 0
+  #   message:   must not be empty
   # path: next_hop_type
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: next_hop_in_ip_address
+  #   condition: length(value) > 0
+  #   message:   must not be empty
 }
 
